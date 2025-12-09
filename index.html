@@ -24,6 +24,24 @@
     body {
       font-family: 'Noto Sans TC', sans-serif;
     }
+    .heart-checkbox {
+      appearance: none;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+      position: relative;
+    }
+    .heart-checkbox::before {
+      content: '🤍';
+      font-size: 28px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .heart-checkbox:checked::before {
+      content: '❤️';
+    }
   </style>
 </head>
 <body class="bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 min-h-screen">
@@ -31,8 +49,40 @@
 
   <script>
     // Supabase 設定
-    const SUPABASE_URL = 'https://etoznvuvwzyhrqyjcgeh.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0b3pudnV2d3p5aHJxeWpjZ2VoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1ODU2ODgsImV4cCI6MjA3NTE2MTY4OH0.Tdy9qlxwGuFV8wk-Ktnust5GI4M7Gxbh9UEwuJJo6sU';
+    const SUPABASE_URL = 'https://utszytwaabadivssondj.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0c3p5dHdhYWJhZGl2c3NvbmRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIzMzQ1MDIsImV4cCI6MjA3NzkxMDUwMn0.Tq2RlCaOegGV7I8jYqgFLHOLpm-bic1RTuIpRzuwqaY';
+
+    // 評價項目定義
+    const EVALUATION_ITEMS = {
+      communication: [
+        { key: 'communication_1', text: '清楚表達托育理念及托育內容' },
+        { key: 'communication_2', text: '主動分享幼兒生活與成長狀況' },
+        { key: 'communication_3', text: '當有特殊狀況時(如:生病、受傷),能即時聯絡' },
+        { key: 'communication_4', text: '當我有疑問時,托育人員能確實回覆' },
+        { key: 'communication_5', text: '與托育人員溝通大致流暢良好' }
+      ],
+      activity: [
+        { key: 'activity_1', text: '提供孩子大致安全的活動環境' },
+        { key: 'activity_2', text: '能安排促進孩子發展的活動' },
+        { key: 'activity_3', text: '能考量孩子的特質調整活動' },
+        { key: 'activity_4', text: '能提供教材、玩具給孩子使用' },
+        { key: 'activity_5', text: '提供多元豐富的托育活動' }
+      ],
+      routine: [
+        { key: 'routine_1', text: '協助孩子建立良好作息(如:吃、睡等)' },
+        { key: 'routine_2', text: '幫助孩子養成良好生活習慣(如:不挑食、勤洗手等)' },
+        { key: 'routine_3', text: '能幫助孩子建立跟其他孩子相處的能力' },
+        { key: 'routine_4', text: '依孩子發展情況協助建立自理能力(如:用餐、如廁、收拾)' },
+        { key: 'routine_5', text: '當孩子有行為問題時,能妥適輔導(如:咬人、打人)' }
+      ],
+      relationship: [
+        { key: 'relationship_1', text: '能考量我的需求,彈性調整托育內容' },
+        { key: 'relationship_2', text: '能共同討論育兒問題、協商處理方式' },
+        { key: 'relationship_3', text: '托育人員能尊重我的教育理念與教養方式' },
+        { key: 'relationship_4', text: '我感覺與托育人員是夥伴關係' },
+        { key: 'relationship_5', text: '我相信孩子受到妥善的照顧' }
+      ]
+    };
 
     // 圖示 SVG
     const icons = {
@@ -40,13 +90,21 @@
       user: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>',
       logout: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>',
       news: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"></path><path d="M18 14h-8"></path><path d="M15 18h-5"></path><path d="M10 6h8v4h-8V6Z"></path></svg>',
-      megaphone: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 14v-3z"></path><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path></svg>'
+      megaphone: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 14v-3z"></path><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path></svg>',
+      heart: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>',
+      star: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>'
     };
 
     // 狀態管理
     let state = {
       user: null,
+      userRole: null, // 'provider' or 'parent'
       providerData: null,
+      parentData: null,
+      assignedProviders: [],
+      currentEvaluation: null,
+      selectedProvider: null,
+      evaluationStats: null,
       news: [],
       currentPage: 'home',
       error: ''
@@ -64,7 +122,12 @@
       const storedUser = sessionStorage.getItem('childcare_user');
       if (storedUser) {
         state.user = JSON.parse(storedUser);
-        fetchProviderData();
+        state.userRole = state.user.role;
+        if (state.userRole === 'provider') {
+          fetchProviderData();
+        } else if (state.userRole === 'parent') {
+          fetchParentData();
+        }
       }
     }
 
@@ -100,10 +163,216 @@
         if (response.ok) {
           const data = await response.json();
           state.providerData = data[0];
+          await fetchEvaluationStats();
           render();
         }
       } catch (error) {
         console.error('獲取資料失敗:', error);
+      }
+    }
+
+    // 獲取托育人員的評價統計
+    async function fetchEvaluationStats() {
+      if (!state.providerData) return;
+      
+      try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/provider_evaluation_stats?provider_id=eq.${state.providerData.id}&select=*`, {
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${state.user.token}`
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          state.evaluationStats = data[0] || null;
+          render();
+        }
+      } catch (error) {
+        console.error('獲取評價統計失敗:', error);
+      }
+    }
+
+    // 獲取家長資料
+    async function fetchParentData() {
+      if (!state.user) return;
+      
+      console.log('=== 開始獲取家長資料 ===');
+      console.log('User ID:', state.user.id);
+      
+      try {
+        // 獲取家長基本資料
+        const parentRes = await fetch(`${SUPABASE_URL}/rest/v1/parents?user_id=eq.${state.user.id}&select=*`, {
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${state.user.token}`
+          }
+        });
+        
+        console.log('家長資料查詢狀態:', parentRes.status);
+        
+        if (parentRes.ok) {
+          const parentData = await parentRes.json();
+          console.log('✅ 家長資料:', parentData);
+          state.parentData = parentData[0];
+        } else {
+          console.error('❌ 獲取家長資料失敗');
+        }
+
+        // 獲取可評價的托育人員
+        console.log('準備獲取分配的托育人員...');
+        await fetchAssignedProviders();
+        
+        console.log('=== 家長資料獲取完成 ===');
+        render();
+      } catch (error) {
+        console.error('❌ 獲取家長資料失敗:', error);
+      }
+    }
+
+    // 獲取家長可評價的托育人員
+    async function fetchAssignedProviders() {
+      if (!state.user) return;
+      
+      try {
+        console.log('=== 開始獲取分配的托育人員 ===');
+        console.log('User ID:', state.user.id);
+        console.log('Token:', state.user.token.substring(0, 20) + '...');
+        
+        // 先獲取分配關係
+        const assignmentUrl = `${SUPABASE_URL}/rest/v1/parent_provider_assignments?parent_user_id=eq.${state.user.id}&select=provider_id`;
+        console.log('查詢 URL:', assignmentUrl);
+        
+        const assignmentRes = await fetch(assignmentUrl, {
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${state.user.token}`
+          }
+        });
+        
+        console.log('分配關係查詢狀態:', assignmentRes.status, assignmentRes.statusText);
+        
+        if (!assignmentRes.ok) {
+          const errorText = await assignmentRes.text();
+          console.error('❌ 獲取分配關係失敗:', errorText);
+          alert('無法讀取分配資料。請檢查 RLS 政策設定。\n錯誤：' + errorText);
+          state.assignedProviders = [];
+          render();
+          return;
+        }
+        
+        const assignments = await assignmentRes.json();
+        console.log('✅ 分配關係資料:', assignments);
+        console.log('分配數量:', assignments.length);
+        
+        if (assignments.length === 0) {
+          console.log('⚠️ 沒有分配關係');
+          state.assignedProviders = [];
+          render();
+          return;
+        }
+        
+        // 獲取托育人員 ID 列表
+        const providerIds = assignments.map(a => a.provider_id);
+        console.log('托育人員 IDs:', providerIds);
+        
+        // 查詢所有分配的托育人員資料
+        const providerUrl = `${SUPABASE_URL}/rest/v1/child_care_providers?id=in.(${providerIds.join(',')})&select=*`;
+        console.log('查詢 URL:', providerUrl);
+        
+        const providerRes = await fetch(providerUrl, {
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${state.user.token}`
+          }
+        });
+        
+        console.log('托育人員查詢狀態:', providerRes.status, providerRes.statusText);
+        
+        if (providerRes.ok) {
+          const providers = await providerRes.json();
+          console.log('✅ 托育人員資料:', providers);
+          console.log('托育人員數量:', providers.length);
+          
+          if (providers.length === 0) {
+            console.log('⚠️ 查詢到分配關係，但找不到對應的托育人員資料');
+          }
+          
+          state.assignedProviders = providers;
+          render();
+        } else {
+          const errorText = await providerRes.text();
+          console.error('❌ 獲取托育人員資料失敗:', errorText);
+          alert('無法讀取托育人員資料。\n錯誤：' + errorText);
+          state.assignedProviders = [];
+          render();
+        }
+      } catch (error) {
+        console.error('❌ 發生錯誤:', error);
+        alert('系統錯誤：' + error.message);
+        state.assignedProviders = [];
+        render();
+      }
+    }
+
+    // 獲取對特定托育人員的評價
+    async function fetchEvaluation(providerId) {
+      if (!state.user) return;
+      
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/evaluations?parent_user_id=eq.${state.user.id}&provider_id=eq.${providerId}&select=*`,
+          {
+            headers: {
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${state.user.token}`
+            }
+          }
+        );
+        if (response.ok) {
+          const data = await response.json();
+          state.currentEvaluation = data[0] || null;
+          render();
+        }
+      } catch (error) {
+        console.error('獲取評價失敗:', error);
+      }
+    }
+
+    // 儲存評價
+    async function saveEvaluation(providerId, evaluationData) {
+      if (!state.user) return;
+      
+      try {
+        const method = state.currentEvaluation ? 'PATCH' : 'POST';
+        const url = state.currentEvaluation 
+          ? `${SUPABASE_URL}/rest/v1/evaluations?id=eq.${state.currentEvaluation.id}`
+          : `${SUPABASE_URL}/rest/v1/evaluations`;
+
+        const body = state.currentEvaluation 
+          ? { ...evaluationData, updated_at: new Date().toISOString() }
+          : { ...evaluationData, parent_user_id: state.user.id, provider_id: providerId };
+
+        const response = await fetch(url, {
+          method: method,
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${state.user.token}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation'
+          },
+          body: JSON.stringify(body)
+        });
+
+        if (response.ok) {
+          alert('評價已儲存！');
+          await fetchEvaluation(providerId);
+        } else {
+          const error = await response.json();
+          alert('儲存失敗：' + (error.message || '未知錯誤'));
+        }
+      } catch (error) {
+        console.error('儲存評價失敗:', error);
+        alert('儲存失敗，請稍後再試');
       }
     }
 
@@ -117,7 +386,11 @@
       }
 
       try {
-        const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+        console.log('=== 開始登入流程 ===');
+        console.log('Email:', email);
+        
+        // 步驟 1: 進行身份驗證
+        const authResponse = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
           method: 'POST',
           headers: {
             'apikey': SUPABASE_ANON_KEY,
@@ -126,22 +399,96 @@
           body: JSON.stringify({ email, password })
         });
         
-        const data = await response.json();
+        const authData = await authResponse.json();
+        console.log('Auth 回應狀態:', authResponse.status);
         
-        if (data.access_token) {
-          state.user = { 
-            id: data.user.id, 
-            email: data.user.email, 
-            token: data.access_token 
-          };
-          sessionStorage.setItem('childcare_user', JSON.stringify(state.user));
+        if (!authData.access_token) {
+          state.error = '帳號或密碼錯誤';
+          console.log('❌ 登入失敗');
+          render();
+          return;
+        }
+
+        const userId = authData.user.id;
+        const token = authData.access_token;
+        console.log('✅ Auth 成功, User ID:', userId);
+
+        // 步驟 2: 判斷使用者身份（檢查是托育人員還是家長）
+        let userRole = null;
+        
+        console.log('檢查是否為托育人員...');
+        // 先檢查是否為托育人員
+        const providerCheck = await fetch(`${SUPABASE_URL}/rest/v1/child_care_providers?user_id=eq.${userId}&select=id`, {
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (providerCheck.ok) {
+          const providerData = await providerCheck.json();
+          console.log('托育人員查詢結果:', providerData);
+          if (providerData.length > 0) {
+            userRole = 'provider';
+            console.log('✅ 身份：托育人員');
+          }
+        }
+
+        // 如果不是托育人員，檢查是否為家長
+        if (!userRole) {
+          console.log('檢查是否為家長...');
+          const parentCheck = await fetch(`${SUPABASE_URL}/rest/v1/parents?user_id=eq.${userId}&select=id`, {
+            headers: {
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          if (parentCheck.ok) {
+            const parentData = await parentCheck.json();
+            console.log('家長查詢結果:', parentData);
+            if (parentData.length > 0) {
+              userRole = 'parent';
+              console.log('✅ 身份：家長');
+            }
+          }
+        }
+
+        // 如果找不到對應身份
+        if (!userRole) {
+          state.error = '此帳號未註冊為托育人員或家長';
+          console.log('❌ 找不到對應身份');
+          render();
+          return;
+        }
+
+        // 步驟 3: 儲存登入狀態
+        state.user = { 
+          id: userId, 
+          email: authData.user.email, 
+          token: token,
+          role: userRole
+        };
+        state.userRole = userRole;
+        sessionStorage.setItem('childcare_user', JSON.stringify(state.user));
+        
+        console.log('=== 登入狀態已儲存 ===');
+        console.log('Role:', userRole);
+        
+        // 步驟 4: 導向對應頁面並獲取資料
+        if (userRole === 'provider') {
+          console.log('載入托育人員資料...');
           state.currentPage = 'profile';
           await fetchProviderData();
         } else {
-          state.error = '帳號或密碼錯誤';
-          render();
+          console.log('載入家長資料...');
+          state.currentPage = 'evaluate';
+          await fetchParentData();
         }
+        
+        console.log('=== 登入流程完成 ===');
       } catch (error) {
+        console.error('❌ 登入錯誤:', error);
         state.error = '登入失敗，請稍後再試';
         render();
       }
@@ -150,7 +497,12 @@
     // 登出
     function handleLogout() {
       state.user = null;
+      state.userRole = null;
       state.providerData = null;
+      state.parentData = null;
+      state.assignedProviders = [];
+      state.currentEvaluation = null;
+      state.selectedProvider = null;
       state.currentPage = 'home';
       sessionStorage.removeItem('childcare_user');
       render();
@@ -160,6 +512,16 @@
     function navigateTo(page) {
       state.currentPage = page;
       state.error = '';
+      state.selectedProvider = null;
+      state.currentEvaluation = null;
+      render();
+    }
+
+    // 選擇要評價的托育人員
+    async function selectProvider(provider) {
+      state.selectedProvider = provider;
+      await fetchEvaluation(provider.id);
+      state.currentPage = 'evaluate-detail';
       render();
     }
 
@@ -188,10 +550,18 @@
                     ${icons.home}
                     <span class="hidden sm:inline">首頁</span>
                   </button>
-                  <button onclick="navigateTo('profile')" class="flex items-center space-x-2 px-4 py-2 rounded-lg transition ${state.currentPage === 'profile' ? 'bg-white text-yellow-600' : 'text-white hover:bg-yellow-500'}">
-                    ${icons.user}
-                    <span class="hidden sm:inline">個人資料</span>
-                  </button>
+                  ${state.userRole === 'provider' ? `
+                    <button onclick="navigateTo('profile')" class="flex items-center space-x-2 px-4 py-2 rounded-lg transition ${state.currentPage === 'profile' ? 'bg-white text-yellow-600' : 'text-white hover:bg-yellow-500'}">
+                      ${icons.user}
+                      <span class="hidden sm:inline">個人資料</span>
+                    </button>
+                  ` : ''}
+                  ${state.userRole === 'parent' ? `
+                    <button onclick="navigateTo('evaluate')" class="flex items-center space-x-2 px-4 py-2 rounded-lg transition ${state.currentPage.startsWith('evaluate') ? 'bg-white text-yellow-600' : 'text-white hover:bg-yellow-500'}">
+                      ${icons.heart}
+                      <span class="hidden sm:inline">評價托育人員</span>
+                    </button>
+                  ` : ''}
                   <button onclick="handleLogout()" class="flex items-center space-x-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">
                     ${icons.logout}
                     <span class="hidden sm:inline">登出</span>
@@ -215,6 +585,8 @@
           ${state.currentPage === 'home' ? renderHomePage() : ''}
           ${state.currentPage === 'login' ? renderLoginPage() : ''}
           ${state.currentPage === 'profile' ? renderProfilePage() : ''}
+          ${state.currentPage === 'evaluate' ? renderEvaluatePage() : ''}
+          ${state.currentPage === 'evaluate-detail' ? renderEvaluateDetailPage() : ''}
         </main>
 
         <!-- 頁尾 -->
@@ -295,7 +667,7 @@
               <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
                 <span class="text-4xl">🔐</span>
               </div>
-              <h2 class="text-3xl font-bold text-white">托育人員登入</h2>
+              <h2 class="text-3xl font-bold text-white">登入系統</h2>
               <p class="text-yellow-100 mt-2">請輸入您的帳號密碼</p>
             </div>
             
@@ -309,7 +681,7 @@
               <div class="space-y-6">
                 <div>
                   <label class="block text-sm font-semibold text-gray-700 mb-2">電子郵件</label>
-                  <input type="email" id="email" placeholder="provider1@example.com"
+                  <input type="email" id="email" placeholder="請輸入電子郵件"
                          class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-yellow-400 focus:outline-none transition">
                 </div>
                 
@@ -326,11 +698,14 @@
               </div>
               
               <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <p class="text-sm text-gray-600">
-                  <strong class="text-yellow-700">測試帳號：</strong><br>
-                  Email: provider1@example.com<br>
-                  密碼: password123
+                <p class="text-sm text-gray-600 mb-3">
+                  <strong class="text-yellow-700">測試帳號：</strong>
                 </p>
+                <div class="text-xs text-gray-600 space-y-1">
+                  <p><strong>托育人員：</strong> provider1@example.com / password123</p>
+                  <p><strong>家長：</strong> parent1@example.com / password123</p>
+                  <p class="text-yellow-700 mt-2">💡 系統會自動判斷您的身份</p>
+                </div>
               </div>
             </div>
           </div>
@@ -338,9 +713,9 @@
       `;
     }
 
-    // 個人資料頁面
+    // 托育人員個人資料頁面
     function renderProfilePage() {
-      if (!state.user) {
+      if (!state.user || state.userRole !== 'provider') {
         navigateTo('login');
         return '';
       }
@@ -353,9 +728,13 @@
           </div>
         `;
       }
+
+      const stats = state.evaluationStats;
+      const hasEvaluations = stats && stats.total_parents > 0;
       
       return `
-        <div class="max-w-4xl mx-auto">
+        <div class="max-w-4xl mx-auto space-y-6">
+          <!-- 個人資料卡片 -->
           <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
             <div class="bg-gradient-to-r from-yellow-400 to-amber-400 px-8 py-12 text-center">
               <div class="w-32 h-32 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl border-4 border-yellow-200">
@@ -382,17 +761,252 @@
                 <p class="text-sm font-semibold text-gray-600 mb-3">個人簡介</p>
                 <p class="text-gray-700 leading-relaxed text-lg">${state.providerData.introduction}</p>
               </div>
-              
-              <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
-                <p class="text-xs text-gray-500">
-                  建立時間：${new Date(state.providerData.created_at).toLocaleString('zh-TW')}<br>
-                  最後更新：${new Date(state.providerData.updated_at).toLocaleString('zh-TW')}
-                </p>
+            </div>
+          </div>
+
+          <!-- 評價統計卡片 -->
+          <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div class="bg-gradient-to-r from-pink-400 to-red-400 px-8 py-6 text-center">
+              <h3 class="text-3xl font-bold text-white flex items-center justify-center gap-3">
+                <span class="text-4xl">❤️</span>
+                家長評價統計
+              </h3>
+            </div>
+
+            ${!hasEvaluations ? `
+              <div class="p-12 text-center">
+                <div class="text-6xl mb-4">📋</div>
+                <p class="text-gray-500 text-lg">尚未有家長評價</p>
+                <p class="text-gray-400 text-sm mt-2">等待家長填寫評價後，統計資料會顯示在這裡</p>
+              </div>
+            ` : `
+              <div class="p-8 space-y-6">
+                <!-- 總覽統計 -->
+                <div class="grid md:grid-cols-3 gap-6">
+                  <div class="bg-gradient-to-br from-red-50 to-pink-50 p-6 rounded-xl border-2 border-red-200 text-center">
+                    <p class="text-sm font-semibold text-gray-600 mb-2">總愛心數</p>
+                    <p class="text-5xl font-bold text-red-500">${stats.total_hearts || 0}</p>
+                    <p class="text-xs text-gray-500 mt-2">❤️ 共獲得的肯定</p>
+                  </div>
+                  
+                  <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border-2 border-blue-200 text-center">
+                    <p class="text-sm font-semibold text-gray-600 mb-2">評價人數</p>
+                    <p class="text-5xl font-bold text-blue-500">${stats.total_parents || 0}</p>
+                    <p class="text-xs text-gray-500 mt-2">👥 位家長給予評價</p>
+                  </div>
+                  
+                  <div class="bg-gradient-to-br from-yellow-50 to-amber-50 p-6 rounded-xl border-2 border-yellow-200 text-center">
+                    <p class="text-sm font-semibold text-gray-600 mb-2">平均愛心</p>
+                    <p class="text-5xl font-bold text-yellow-500">${stats.total_parents > 0 ? (stats.total_hearts / stats.total_parents).toFixed(1) : 0}</p>
+                    <p class="text-xs text-gray-500 mt-2">⭐ 每位家長平均給予</p>
+                  </div>
+                </div>
+
+                <!-- 各主題統計 -->
+                <div class="bg-gray-50 rounded-xl p-6">
+                  <h4 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <span>📊</span>
+                    各主題獲得愛心數
+                  </h4>
+                  <div class="grid md:grid-cols-2 gap-4">
+                    <div class="bg-white p-4 rounded-lg border-2 border-purple-200">
+                      <div class="flex justify-between items-center">
+                        <span class="font-semibold text-gray-700">一、保親溝通</span>
+                        <span class="text-2xl font-bold text-purple-500">${stats.communication_hearts || 0}</span>
+                      </div>
+                      <div class="mt-2 bg-purple-100 rounded-full h-2">
+                        <div class="bg-purple-500 h-2 rounded-full" style="width: ${(stats.communication_hearts || 0) / (stats.total_parents * 5) * 100}%"></div>
+                      </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-lg border-2 border-green-200">
+                      <div class="flex justify-between items-center">
+                        <span class="font-semibold text-gray-700">二、托育活動安排</span>
+                        <span class="text-2xl font-bold text-green-500">${stats.activity_hearts || 0}</span>
+                      </div>
+                      <div class="mt-2 bg-green-100 rounded-full h-2">
+                        <div class="bg-green-500 h-2 rounded-full" style="width: ${(stats.activity_hearts || 0) / (stats.total_parents * 5) * 100}%"></div>
+                      </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-lg border-2 border-blue-200">
+                      <div class="flex justify-between items-center">
+                        <span class="font-semibold text-gray-700">三、作息安排與生活習慣</span>
+                        <span class="text-2xl font-bold text-blue-500">${stats.routine_hearts || 0}</span>
+                      </div>
+                      <div class="mt-2 bg-blue-100 rounded-full h-2">
+                        <div class="bg-blue-500 h-2 rounded-full" style="width: ${(stats.routine_hearts || 0) / (stats.total_parents * 5) * 100}%"></div>
+                      </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-lg border-2 border-pink-200">
+                      <div class="flex justify-between items-center">
+                        <span class="font-semibold text-gray-700">四、保親關係</span>
+                        <span class="text-2xl font-bold text-pink-500">${stats.relationship_hearts || 0}</span>
+                      </div>
+                      <div class="mt-2 bg-pink-100 rounded-full h-2">
+                        <div class="bg-pink-500 h-2 rounded-full" style="width: ${(stats.relationship_hearts || 0) / (stats.total_parents * 5) * 100}%"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 flex items-start gap-3">
+                  <span class="text-2xl">ℹ️</span>
+                  <div class="text-sm text-blue-800">
+                    <p class="font-semibold mb-1">評價說明：</p>
+                    <p>家長的評價是匿名的，您只能看到統計數據，無法得知是哪位家長給予的評價。這是為了保護家長的隱私，並確保評價的客觀性。</p>
+                  </div>
+                </div>
+              </div>
+            `}
+          </div>
+        </div>
+      `;
+    }
+
+    // 家長評價頁面（列表）
+    function renderEvaluatePage() {
+      if (!state.user || state.userRole !== 'parent') {
+        navigateTo('login');
+        return '';
+      }
+
+      if (state.assignedProviders.length === 0) {
+        return `
+          <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl p-12 text-center">
+            <div class="text-6xl mb-4">👶</div>
+            <h3 class="text-2xl font-bold text-gray-800 mb-2">尚未分配托育人員</h3>
+            <p class="text-gray-600">請聯絡管理員為您分配可評價的托育人員</p>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="max-w-5xl mx-auto">
+          <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div class="bg-gradient-to-r from-yellow-400 to-amber-400 px-8 py-6">
+              <h2 class="text-3xl font-bold text-white flex items-center gap-3">
+                <span>❤️</span>
+                評價托育人員
+              </h2>
+              <p class="text-yellow-100 mt-2">點選托育人員進行評價，您可以隨時修改評價內容</p>
+            </div>
+
+            <div class="p-8">
+              <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                ${state.assignedProviders.map(provider => `
+                  <div class="bg-gradient-to-br from-yellow-50 to-amber-50 rounded-xl p-6 border-2 border-yellow-200 hover:border-yellow-400 hover:shadow-lg transition cursor-pointer"
+                       onclick="selectProvider(${JSON.stringify(provider).replace(/"/g, '&quot;')})">
+                    <div class="flex flex-col items-center text-center">
+                      <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4 shadow-md">
+                        <span class="text-4xl">${provider.gender === '男' ? '👨‍🏫' : '👩‍🏫'}</span>
+                      </div>
+                      <h3 class="text-xl font-bold text-gray-800 mb-1">${provider.name}</h3>
+                      <p class="text-sm text-gray-600 mb-3">${provider.gender}</p>
+                      <button class="px-6 py-2 bg-gradient-to-r from-yellow-400 to-amber-400 text-white font-semibold rounded-lg hover:from-yellow-500 hover:to-amber-500 transition">
+                        開始評價
+                      </button>
+                    </div>
+                  </div>
+                `).join('')}
               </div>
             </div>
           </div>
         </div>
       `;
+    }
+
+    // 家長評價詳細頁面
+    function renderEvaluateDetailPage() {
+      if (!state.selectedProvider) {
+        navigateTo('evaluate');
+        return '';
+      }
+
+      const provider = state.selectedProvider;
+      const evaluation = state.currentEvaluation || {};
+
+      return `
+        <div class="max-w-4xl mx-auto">
+          <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+            <!-- 托育人員資訊 -->
+            <div class="bg-gradient-to-r from-yellow-400 to-amber-400 px-8 py-8">
+              <button onclick="navigateTo('evaluate')" class="text-white hover:text-yellow-100 mb-4 flex items-center gap-2">
+                ← 返回列表
+              </button>
+              <div class="flex items-center gap-6">
+                <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg">
+                  <span class="text-5xl">${provider.gender === '男' ? '👨‍🏫' : '👩‍🏫'}</span>
+                </div>
+                <div>
+                  <h2 class="text-3xl font-bold text-white mb-2">${provider.name}</h2>
+                  <p class="text-yellow-100">正在評價這位托育人員</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 評價表單 -->
+            <div class="p-8">
+              <form id="evaluationForm" onsubmit="handleSubmitEvaluation(event, '${provider.id}')">
+                ${renderEvaluationSection('一、保親溝通', 'communication', EVALUATION_ITEMS.communication, evaluation)}
+                ${renderEvaluationSection('二、托育活動安排', 'activity', EVALUATION_ITEMS.activity, evaluation)}
+                ${renderEvaluationSection('三、作息安排與生活習慣', 'routine', EVALUATION_ITEMS.routine, evaluation)}
+                ${renderEvaluationSection('四、保親關係', 'relationship', EVALUATION_ITEMS.relationship, evaluation)}
+
+                <!-- 提交按鈕 -->
+                <div class="mt-8 flex gap-4">
+                  <button type="submit" class="flex-1 py-4 bg-gradient-to-r from-yellow-400 to-amber-400 text-white font-bold text-lg rounded-lg hover:from-yellow-500 hover:to-amber-500 transition shadow-lg">
+                    💾 儲存評價
+                  </button>
+                  <button type="button" onclick="navigateTo('evaluate')" class="px-8 py-4 bg-gray-200 text-gray-700 font-bold rounded-lg hover:bg-gray-300 transition">
+                    取消
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // 渲染評價區塊
+    function renderEvaluationSection(title, category, items, evaluation) {
+      return `
+        <div class="mb-8 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border-2 border-gray-200">
+          <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <span class="text-2xl">📋</span>
+            ${title}
+          </h3>
+          <div class="space-y-3">
+            ${items.map(item => `
+              <div class="bg-white p-4 rounded-lg border border-gray-200 hover:border-yellow-400 transition">
+                <label class="flex items-center gap-4 cursor-pointer">
+                  <input type="checkbox" 
+                         name="${item.key}" 
+                         class="heart-checkbox"
+                         ${evaluation[item.key] ? 'checked' : ''}>
+                  <span class="text-gray-700 flex-1">${item.text}</span>
+                </label>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    // 處理評價表單提交
+    function handleSubmitEvaluation(event, providerId) {
+      event.preventDefault();
+      const formData = new FormData(event.target);
+      const evaluationData = {};
+      
+      // 收集所有評價項目
+      Object.values(EVALUATION_ITEMS).flat().forEach(item => {
+        evaluationData[item.key] = formData.has(item.key);
+      });
+
+      saveEvaluation(providerId, evaluationData);
     }
 
     // 啟動應用
